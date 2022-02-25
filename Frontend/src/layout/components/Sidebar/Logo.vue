@@ -3,7 +3,7 @@
  * @Author: MorantJY
  * @Date: 2022-02-16 13:24:40
  * @LastEditors: MorantJY
- * @LastEditTime: 2022-02-19 21:47:25
+ * @LastEditTime: 2022-02-25 17:13:23
 -->
 <template>
   <div class="sidebar-logo-container" :class="{'collapse':collapse}">
@@ -32,7 +32,7 @@ export default {
   },
   data() {
     return {
-      title: `MorantJY's toDoList`,
+      title: `待办管理系统`,
       logo: Logo
     }
   }

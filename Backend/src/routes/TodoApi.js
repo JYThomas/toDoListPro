@@ -3,11 +3,13 @@
  * @Author: MorantJY
  * @Date: 2022-02-11 22:22:32
  * @LastEditors: MorantJY
- * @LastEditTime: 2022-02-19 15:42:47
+ * @LastEditTime: 2022-02-25 17:14:31
  */
 const jwt = require('jsonwebtoken'); //导入JSONWEBTOKEN包 使用npm install jsonwebtoken安装JWT包
 const { TOKEN_SECRET_CONFIG } = require("../config/tokenSecretKeyConfig");
 const { successModel,ErrorModel } = require("../model/responseModel")
+
+// 待办模块接口
 const { 
     getTodoList,
     getFinishedList,
@@ -19,12 +21,22 @@ const {
     getStateOverviewData
 } = require("../controllers/Todo");
 
+// 统计模块接口
+const { 
+    getStatisticsData
+} = require("../controllers/Statistics");
+
+// 用户登录接口
 const {
     login,
     getUserInfo,
     userLogout,
     setTokenInDB,
 } = require("../controllers/login");
+
+var moment = require('moment');
+
+
 
 const handleTodoRoute = (req,res)=>{
     // 定义处理路由逻辑
@@ -214,6 +226,82 @@ const handleTodoRoute = (req,res)=>{
             }
         });
     }
+
+    // 获取今日待办、已完成与累计统计数据
+    if(method === "GET" && req.path === "/api/Todo/getOverviewStatistics"){
+        const USER_TOKEN = req.headers.authorization;
+        return jwt.verify(USER_TOKEN,TOKEN_SECRET_CONFIG,(err,userData)=>{
+            if(err){
+                console.log(err); //invalid signature
+            }
+            else{
+                const getOverviewStatisticsPromise = getStatisticsData(userData); // 返回的是promise对象
+                return getOverviewStatisticsPromise.then((_todoData)=>{
+                    let statisticsData = {
+                        todayTodo:0,
+                        todayFinished:0,
+                        cumulativeTodo:0,
+                        cumulativeFinished:0
+                    }
+                    _todoData.forEach(element => {
+                        let date = moment(Number(element.Todo_createTime)).format('YYYY-MM-DD')
+                        let today = moment().format("YYYY-MM-DD");
+                        if(date == today && element.Todo_state == 'false'){
+                            statisticsData.todayTodo += 1;
+                        }
+                        if(date == today && element.Todo_state == 'true'){
+                            statisticsData.todayFinished += 1;
+                        }
+                        if(element.Todo_state == 'false'){
+                            statisticsData.cumulativeTodo += 1;
+                        }
+                        if(element.Todo_state == 'true'){
+                            statisticsData.cumulativeFinished += 1;
+                        }
+                    });
+                    return new successModel(statisticsData);
+                });
+            }
+        });
+    }
+
+    //获取每月待办程度统计数据
+    if(method === "GET" && req.path === "/api/Todo/getStateStatistics"){
+        const USER_TOKEN = req.headers.authorization;
+        return jwt.verify(USER_TOKEN,TOKEN_SECRET_CONFIG,(err,userData)=>{
+            if(err){
+                console.log(err); //invalid signature
+            }
+            else{
+                const stateStatisticsPromise = getStatisticsData(userData); // 返回的是promise对象
+                return stateStatisticsPromise.then((_todoData)=>{
+                    let stateOverviewData = {
+                        emergency:[0,0,0,0,0,0,0,0,0,0,0,0],
+                        important:[0,0,0,0,0,0,0,0,0,0,0,0],
+                        general:[0,0,0,0,0,0,0,0,0,0,0,0],
+                        ordinary:[0,0,0,0,0,0,0,0,0,0,0,0]
+                    }
+                    _todoData.forEach(element => {
+                        let month = moment(Number(element.Todo_createTime)).format('M');
+                        if(element.Todo_typeId == 1){
+                            stateOverviewData.emergency[month-1] += 1;
+                        }
+                        if(element.Todo_typeId == 2){
+                            stateOverviewData.important[month-1] += 1;
+                        }
+                        if(element.Todo_typeId == 3){
+                            stateOverviewData.general[month-1] += 1;
+                        }
+                        if(element.Todo_typeId == 4){
+                            stateOverviewData.ordinary[month-1] += 1;
+                        }
+                    });
+                    return new successModel(stateOverviewData);
+                });
+            }
+        });
+    }
+    
     
 }
 

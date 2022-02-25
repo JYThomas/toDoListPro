@@ -3,7 +3,7 @@
  * @Author: MorantJY
  * @Date: 2022-02-16 13:24:40
  * @LastEditors: MorantJY
- * @LastEditTime: 2022-02-16 16:10:42
+ * @LastEditTime: 2022-02-25 17:09:47
  */
 import router from './router'
 import store from './store'
@@ -31,7 +31,6 @@ router.beforeEach(async(to, from, next) => {
   if (hasToken) {
     if (to.path === '/login') {
       // if is logged in, redirect to the home page
-
       next({ path: '/' })
       NProgress.done()
     } 

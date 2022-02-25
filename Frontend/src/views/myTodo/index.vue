@@ -3,7 +3,7 @@
  * @Author: MorantJY
  * @Date: 2022-02-16 21:57:07
  * @LastEditors: MorantJY
- * @LastEditTime: 2022-02-19 17:20:37
+ * @LastEditTime: 2022-02-25 14:31:16
 -->
 
 <template>
@@ -135,7 +135,7 @@
         <div id="right">
             <div id="description">概览</div>
             <div id="todayOverview"></div>
-            <div id="stateOverview">今日待办情况</div>
+            <div id="stateOverview">待办情况</div>
         </div>
       </div>
       <el-drawer
@@ -322,7 +322,7 @@ export default {
             
             option = {
                 title: {
-                    text: '当日待办概览',
+                    text: '待办概览',
                     subtext: '未完成/已完成',
                     left: 'center'
                 },
@@ -408,7 +408,7 @@ export default {
             var option;
             option = {
                 title: {
-                    text: '当日待办事项状态',
+                    text: '待办状态',
                     left: 'center'
                 },
                 
@@ -719,6 +719,7 @@ export default {
     text-align: left;
     border-top-left-radius: 15px;
     font-size: 24px;
+    font-weight: 700;
     color: #2a3a4a;
   }
   .my-grid-content-right {

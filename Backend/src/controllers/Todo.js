@@ -3,7 +3,7 @@
  * @Author: MorantJY
  * @Date: 2022-02-11 23:58:03
  * @LastEditors: MorantJY
- * @LastEditTime: 2022-02-19 15:43:30
+ * @LastEditTime: 2022-02-25 14:48:58
  */
 const { execSQL } = require("../database/mysql");
 
@@ -54,7 +54,7 @@ const updateState = (todoData)=>{
     return execSQL(sql);
 }
 
-//获取今日待办概览图表数据
+//获取待办概览图表数据
 const getTodayOverviewData = (userData)=>{
     const Todo_userId = userData.User_id;
     const sql = `
@@ -63,7 +63,7 @@ const getTodayOverviewData = (userData)=>{
     return execSQL(sql);
 }
 
-//获取今日状态概览图表数据
+//获取状态概览图表数据
 const getStateOverviewData = (userData)=>{
     const Todo_userId = userData.User_id;
     const sql = `

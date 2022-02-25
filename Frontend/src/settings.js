@@ -3,11 +3,11 @@
  * @Author: MorantJY
  * @Date: 2022-02-16 13:24:40
  * @LastEditors: MorantJY
- * @LastEditTime: 2022-02-19 21:35:37
+ * @LastEditTime: 2022-02-25 17:13:07
  */
 module.exports = {
 
-  title: `MorantJY's toDoList`,
+  title: `待办管理系统`,
 
   /**
    * @type {boolean} true | false

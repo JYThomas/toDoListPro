@@ -3,11 +3,13 @@
  * @Author: MorantJY
  * @Date: 2022-02-16 13:24:40
  * @LastEditors: MorantJY
- * @LastEditTime: 2022-02-16 17:34:47
+ * @LastEditTime: 2022-02-25 17:09:04
  */
 import { userLogin, logout, getUserInfo } from '@/api/user'
 import { getToken, setToken, removeToken } from '@/utils/auth'
 import { resetRouter } from '@/router'
+
+import { Message } from 'element-ui' //JS文件引用ElementUI
 
 import { ACCESS_TOKEN,USERID,USERNAME } from "@/store/mutation-types";
 
@@ -51,19 +53,27 @@ const actions = {
     
     return new Promise((resolve, reject) => {
       userLogin({ username: username.trim(), password: password }).then(response => {
+        if(response.data.length !== 0){
+          const { data } = response
+          storage.set(USERID, data.User_id);
+          storage.set(USERNAME, data.User_name);
+          storage.set(ACCESS_TOKEN, data.User_TOKEN);
 
-        const { data } = response
-        storage.set(USERID, data.User_id);
-        storage.set(USERNAME, data.User_name);
-        storage.set(ACCESS_TOKEN, data.User_TOKEN);
+          commit('SET_NAME', data.User_name)
+          commit('SET_ID', data.User_id)
+          commit('SET_TOKEN', data.User_TOKEN)
 
-        commit('SET_NAME', data.User_name)
-        commit('SET_ID', data.User_id)
-        commit('SET_TOKEN', data.User_TOKEN)
-
-        setToken(data.User_TOKEN);//将token存放到cookie里面 路由守卫permission要用到
-        
-        resolve()
+          setToken(data.User_TOKEN);//将token存放到cookie里面 路由守卫permission要用到
+          
+          resolve()
+        }
+        else{
+          Message({
+            message: '用户名或密码错误,请重试！',
+            type: 'error'
+          })
+          resolve()
+        }
 
       }).catch(error => {
         reject(error)
@@ -75,7 +85,9 @@ const actions = {
   getInfo({ commit, state }) {
     return new Promise((resolve, reject) => {
       getUserInfo().then(response => {
-        
+        console.log(321);
+        console.log(response);
+        console.log(321);
         const { data } = response; //response返回的是一个对象数组
 
         if (!data) {
