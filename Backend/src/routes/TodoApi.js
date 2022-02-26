@@ -3,7 +3,7 @@
  * @Author: MorantJY
  * @Date: 2022-02-11 22:22:32
  * @LastEditors: MorantJY
- * @LastEditTime: 2022-02-25 17:14:31
+ * @LastEditTime: 2022-02-26 13:30:55
  */
 const jwt = require('jsonwebtoken'); //导入JSONWEBTOKEN包 使用npm install jsonwebtoken安装JWT包
 const { TOKEN_SECRET_CONFIG } = require("../config/tokenSecretKeyConfig");
@@ -35,8 +35,6 @@ const {
 } = require("../controllers/login");
 
 var moment = require('moment');
-
-
 
 const handleTodoRoute = (req,res)=>{
     // 定义处理路由逻辑
@@ -302,7 +300,134 @@ const handleTodoRoute = (req,res)=>{
         });
     }
     
-    
+    //获取当天待办和已完成数据(列表显示)
+    if(method === "GET" && req.path === "/api/Todo/getTodayData"){
+        const USER_TOKEN = req.headers.authorization;
+        return jwt.verify(USER_TOKEN,TOKEN_SECRET_CONFIG,(err,userData)=>{
+            if(err){
+                console.log(err); //invalid signature
+            }
+            else{
+                const todayDataPromise = getStatisticsData(userData); // 获取所有记录数据
+                return todayDataPromise.then((_todoData)=>{
+                    let todayTodoArr = {
+                        todayTodo:[],
+                        todayfinished:[]
+                    };
+                    _todoData.forEach(element => {
+                        let date = moment(Number(element.Todo_createTime)).format('YYYY-MM-DD')
+                        let today = moment().format("YYYY-MM-DD");
+                        if(date == today && element.Todo_state == 'false'){
+                            todayTodoArr.todayTodo.push(element);
+                        }
+                        if(date == today && element.Todo_state == 'true'){
+                            todayTodoArr.todayfinished.push(element);
+                        }
+                    });
+                    return new successModel(todayTodoArr);
+                });
+            }
+        });
+    }
+
+
+    //2-26晚加数据统计接口
+    //获取当日状态情况（我的待办_待办概览图表）
+    if(method === "GET" && req.path === "/api/Todo/getTodayTodo_Finished"){
+        const USER_TOKEN = req.headers.authorization;
+        return jwt.verify(USER_TOKEN,TOKEN_SECRET_CONFIG,(err,userData)=>{
+            if(err){
+                console.log(err); //invalid signature
+            }
+            else{
+                const todayDataPromise = getStatisticsData(userData); // 获取所有记录数据
+                return todayDataPromise.then((_todoData)=>{
+                    let resData = {
+                        dataArr:[],
+                    }
+                    let todoObj = {
+                        value:0,
+                        name:"未完成"
+                    };
+                    let finishedObj = {
+                        value:0,
+                        name:"已完成"
+                    };
+                    _todoData.forEach(element => {
+                        let date = moment(Number(element.Todo_createTime)).format('YYYY-MM-DD')
+                        let today = moment().format("YYYY-MM-DD");
+                        if(date == today && element.Todo_state == 'false'){
+                            todoObj.value += 1;
+                        }
+                        if(date == today && element.Todo_state == 'true'){
+                            finishedObj.value += 1;
+                        }
+                    });
+                    resData.dataArr.push(todoObj);
+                    resData.dataArr.push(finishedObj);
+
+                    return new successModel(resData);
+                });
+            }
+        });
+    }
+
+    //获取当日事项状态分布(我的待办_待办状态图表)
+    if(method === "GET" && req.path === "/api/Todo/getTodayStateDistribution"){
+        const USER_TOKEN = req.headers.authorization;
+        return jwt.verify(USER_TOKEN,TOKEN_SECRET_CONFIG,(err,userData)=>{
+            if(err){
+                console.log(err); //invalid signature
+            }
+            else{
+                const todayDataPromise = getStatisticsData(userData); // 获取所有记录数据
+                return todayDataPromise.then((_todoData)=>{
+                    let resData = {
+                        stateDataArr:[],
+                    }
+                    let emergencyObj = {
+                        value:0,
+                        name:"紧急"
+                    };
+                    let importantObj = {
+                        value:0,
+                        name:"重要"
+                    };
+                    let normalObj = {
+                        value:0,
+                        name:"一般"
+                    };
+                    let ordinaryObj = {
+                        value:0,
+                        name:"普通"
+                    };
+                    _todoData.forEach(element => {
+                        let date = moment(Number(element.Todo_createTime)).format('YYYY-MM-DD')
+                        let today = moment().format("YYYY-MM-DD");
+                        if(date == today && element.Todo_typeId == 1){
+                            emergencyObj.value += 1;
+                        }
+                        if(date == today && element.Todo_typeId == 2){
+                            importantObj.value += 1;
+                        }
+                        if(date == today && element.Todo_typeId == 3){
+                            normalObj.value += 1;
+                        }
+                        if(date == today && element.Todo_typeId == 4){
+                            ordinaryObj.value += 1;
+                        }
+                    });
+                    resData.stateDataArr.push(emergencyObj);
+                    resData.stateDataArr.push(importantObj);
+                    resData.stateDataArr.push(normalObj);
+                    resData.stateDataArr.push(ordinaryObj);
+
+                    return new successModel(resData);
+                });
+            }
+        });
+    }
+
 }
 
 module.exports = handleTodoRoute;

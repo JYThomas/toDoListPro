@@ -3,13 +3,14 @@
  * @Author: MorantJY
  * @Date: 2022-02-16 21:57:07
  * @LastEditors: MorantJY
- * @LastEditTime: 2022-02-25 14:31:16
+ * @LastEditTime: 2022-02-26 13:38:50
 -->
 
 <template>
   <div class="dashboard-container">
       <div id="top">
           <el-row>
+            
             <el-col :span="12"><div class="grid-content bg-purple-light"></div></el-col>
             <el-col :span="10"><div class="grid-content bg-purple">
                 <el-input
@@ -28,14 +29,19 @@
         <div id="left">
             <div id="addTodo">
                 <el-row>
-                    <el-col :span="12"><div class="my-grid-content-left bg-purple">我的待办</div></el-col>
-                    <el-col :span="12"><div class="my-grid-content-right bg-purple-light">
+                    <el-col :span="14"><div class="my-grid-content-left bg-purple">我的待办</div></el-col>
+                    <el-col :span="3"><div class="classify">
+                    <el-button type="primary" @click="getAllData" round size="small">全部待办</el-button>
+                    </div></el-col>
+                    <el-col :span="3"><div class="classify">
+                    <el-button type="primary" @click="_getTodayData" round size="small">今日待办</el-button>
+                    </div></el-col>
+                    <el-col :span="4"><div class="my-grid-content-right bg-purple-light">
                         <el-button type="primary" @click="handleOpen" style="width:120px" round size="small">新建待办</el-button>
                         </div></el-col>
                 </el-row>
                 <hr>
             </div>
-            
             <div id="todo">
                 <el-table
                     :data="todoList"
@@ -177,9 +183,15 @@ import {
   updateState,
 
   getTodayOverviewData,
-  getStateOverviewData
-  
+  getStateOverviewData,
+
+  getTodayData,
+
+  getTodayTodo_Finished,
+  getTodayStateDistribution
+
 } from "@/api/todo";
+
 import * as echarts from 'echarts'
 import moment from 'moment'
 
@@ -578,7 +590,158 @@ export default {
                 this.initTodayOverviewCharts();
             }
         })
-    }  
+    },
+    //获取全部待办与已完成数据
+    getAllData(){
+        this._getTodoList();
+        this._getFinishedList();
+        this.initTodayOverviewCharts();
+        this.initStateOverviewCharts();
+    },
+    // 获取当日数据
+    _getTodayData(){
+        getTodayData().then((res)=>{
+            let todayData = res.data;
+            let todayTodoFormat = [];
+            let todatFinishedFormat = [];
+
+            todayData.todayTodo.forEach(element => {
+                element.Todo_createTime = moment(Number(element.Todo_createTime)).format('YYYY-MM-DD HH:MM');
+                if(element.Todo_typeId == '1'){
+                    element.Todo_typeId = '紧急';
+                }
+                if(element.Todo_typeId == '2'){
+                    element.Todo_typeId = '重要';
+                }
+                if(element.Todo_typeId == '3'){
+                    element.Todo_typeId = '一般';
+                }
+                if(element.Todo_typeId == '4'){
+                    element.Todo_typeId = '普通';
+                }
+                todayTodoFormat.push(element);
+            });
+            todayData.todayfinished.forEach(element => {
+                element.Todo_createTime = moment(Number(element.Todo_createTime)).format('YYYY-MM-DD HH:MM');
+                if(element.Todo_typeId == '1'){
+                    element.Todo_typeId = '紧急';
+                }
+                if(element.Todo_typeId == '2'){
+                    element.Todo_typeId = '重要';
+                }
+                if(element.Todo_typeId == '3'){
+                    element.Todo_typeId = '一般';
+                }
+                if(element.Todo_typeId == '4'){
+                    element.Todo_typeId = '普通';
+                }
+                todatFinishedFormat.push(element);
+            });
+            this.todoList = todayTodoFormat;
+            this.finishedList = todatFinishedFormat;
+        });
+
+        this._getTodayTodo_Finished();
+        this._getTodayStateDistribution();
+
+    },
+    //获取当日待办情况(图表显示)
+    _getTodayTodo_Finished(){
+        getTodayTodo_Finished().then((res)=>{
+            let chartDom = document.getElementById('todayOverview');
+            let myChart = echarts.init(chartDom);
+            let option;
+            
+            option = {
+                title: {
+                    text: '待办概览',
+                    subtext: '未完成/已完成',
+                    left: 'center'
+                },
+                tooltip: {
+                    trigger: 'item'
+                },
+                legend: {
+                    orient: 'vertical',
+                    left: 'left'
+                },
+                series: [
+                    {
+                    name: '概览',
+                    type: 'pie',
+                    radius: '50%',
+                    data: res.data.dataArr,
+                    emphasis: {
+                        itemStyle: {
+                        shadowBlur: 10,
+                        shadowOffsetX: 0,
+                        shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    }
+                    }
+                ]
+            };
+            option && myChart.setOption(option);
+
+        });
+    },
+    //获取当日待办状态分布(图表显示)
+    _getTodayStateDistribution(){
+        getTodayStateDistribution().then((res)=>{
+            var chartDom = document.getElementById('stateOverview');
+            var myChart = echarts.init(chartDom);
+            var option;
+            option = {
+                title: {
+                    text: '待办状态',
+                    left: 'center'
+                },
+                
+                tooltip: {
+                    trigger: 'item',
+                    formatter: '{a} <br/>{b} : {c} ({d}%)'
+                },
+                legend: {
+                    orient: 'vertical',
+                    left: 'left'
+                },
+                label: {
+                    show: false
+                },
+                toolbox: {
+                        show: true,
+                        feature: {
+                        mark: { show: true },
+                    }
+                },
+                series: [
+                    {
+                    name: '待办状态分布',
+                    type: 'pie',
+                    radius: [15, 90],
+                    center: ['55%', '60%'],
+                    roseType: 'radius',
+                    itemStyle: {
+                        borderRadius: 5
+                    },
+                    label: {
+                        show: false
+                    },
+                    emphasis: {
+                        label: {
+                        show: true
+                        }
+                    },
+                    data: res.data.stateDataArr
+                    }
+                ],
+                // 手动设置分块颜色
+                color:['#ee6666','#fac858','#5470c6','#91cc75']
+            };
+            option && myChart.setOption(option);
+        });
+    }
+
   }
 }
 </script>
@@ -649,6 +812,7 @@ export default {
 #finished {
     width: auto;
     height: 440px;
+    padding: 5px;
     margin-bottom: 10px;
     background-color: white;
     border-bottom-left-radius: 15px;
@@ -686,6 +850,15 @@ export default {
 #form {
     margin: 10px 20px 10px 0px;
 }
+
+.classify {
+    min-height: 45px;
+    line-height: 45px;
+    text-align: center;
+    background-color: #ffffff;
+    padding-right: 5px;
+}
+
 
 // ================ElementUI样式===================
 .el-row {

@@ -3,7 +3,7 @@
  * @Author: MorantJY
  * @Date: 2022-02-16 13:24:40
  * @LastEditors: MorantJY
- * @LastEditTime: 2022-02-25 17:13:23
+ * @LastEditTime: 2022-02-25 22:07:06
 -->
 <template>
   <div class="sidebar-logo-container" :class="{'collapse':collapse}">
@@ -52,9 +52,9 @@ export default {
 .sidebar-logo-container {
   position: relative;
   width: 100%;
-  height: 50px;
-  line-height: 50px;
-  background: #2b2f3a;
+  height: 60px;
+  line-height: 60px;
+  background: #293749;
   text-align: center;
   overflow: hidden;
 

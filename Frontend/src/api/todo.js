@@ -3,7 +3,7 @@
  * @Author: MorantJY
  * @Date: 2022-02-16 22:01:13
  * @LastEditors: MorantJY
- * @LastEditTime: 2022-02-19 15:39:40
+ * @LastEditTime: 2022-02-26 13:07:53
  */
 
 import request from "@/utils/request";
@@ -16,7 +16,13 @@ const todoApi = {
     updateState: "/api/Todo/updateState",
     
     getTodayOverviewData:"/api/Todo/getTodayOverviewData",
-    getStateOverviewData:"/api/Todo/getStateOverviewData"
+    getStateOverviewData:"/api/Todo/getStateOverviewData",
+
+    getTodayData:"/api/Todo/getTodayData",
+
+    // 我的待办今日图表数据
+    getTodayTodo_Finished:"/api/Todo/getTodayTodo_Finished",
+    getTodayStateDistribution:"/api/Todo/getTodayStateDistribution"
 }
 
 /*
@@ -90,4 +96,35 @@ export function getStateOverviewData(){
         method: 'get'
     });
 }
+
+
+//获取当日待办与已完成记录
+export function getTodayData(){
+    return request({
+        url: todoApi.getTodayData,
+        method: 'get'
+    });
+}
+
+
+
+//获取我的待办今日图表数据
+export function getTodayTodo_Finished(){
+    return request({
+        url: todoApi.getTodayTodo_Finished,
+        method: 'get'
+    });
+}
+
+//获取我的待办今日待办状态分布图表数据
+export function getTodayStateDistribution(){
+    return request({
+        url: todoApi.getTodayStateDistribution,
+        method: 'get'
+    });
+}
+
+
+
+
 

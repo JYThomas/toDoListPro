@@ -3,7 +3,7 @@
  * @Author: MorantJY
  * @Date: 2022-02-16 13:24:40
  * @LastEditors: MorantJY
- * @LastEditTime: 2022-02-25 17:10:11
+ * @LastEditTime: 2022-02-25 23:35:53
 -->
 <template>
   <div class="dashboard-container">
@@ -40,7 +40,7 @@
            <el-col :span="12"><div class="grid-content bg-purple">
             <div class="cardIcons"><img src="@/icons/svg/累计待办.png" alt="累计待办"></div>  
             <div class="cardDesc">
-              <span style="margin-bottom:10px;display:block;">累计待办</span>
+              <span style="margin-bottom:10px;display:block;">待办总数</span>
               <span>{{this.overviewData.cumulativeTodo}}</span>  
             </div>  
           </div></el-col>

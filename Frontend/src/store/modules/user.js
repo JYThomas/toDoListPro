@@ -3,7 +3,7 @@
  * @Author: MorantJY
  * @Date: 2022-02-16 13:24:40
  * @LastEditors: MorantJY
- * @LastEditTime: 2022-02-25 17:09:04
+ * @LastEditTime: 2022-02-25 23:37:02
  */
 import { userLogin, logout, getUserInfo } from '@/api/user'
 import { getToken, setToken, removeToken } from '@/utils/auth'
@@ -85,9 +85,6 @@ const actions = {
   getInfo({ commit, state }) {
     return new Promise((resolve, reject) => {
       getUserInfo().then(response => {
-        console.log(321);
-        console.log(response);
-        console.log(321);
         const { data } = response; //response返回的是一个对象数组
 
         if (!data) {
